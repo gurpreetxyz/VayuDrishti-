@@ -1,0 +1,487 @@
+import streamlit as st
+import pandas as pd
+import random
+from datetime import datetime
+
+# ---------------------------------------------------
+# PAGE CONFIGURATION
+# ---------------------------------------------------
+
+st.set_page_config(
+    page_title="VayuDrishti",
+    page_icon="🌦️",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# ---------------------------------------------------
+# CUSTOM CSS
+# ---------------------------------------------------
+
+st.markdown("""
+<style>
+
+.main {
+    background-color: #f5f8fc;
+}
+
+.header {
+    background: linear-gradient(90deg, #0b4f8a, #1677c8);
+    padding: 25px;
+    border-radius: 15px;
+    color: white;
+    margin-bottom: 25px;
+}
+
+.header h1 {
+    font-size: 42px;
+    margin-bottom: 5px;
+}
+
+.header p {
+    font-size: 18px;
+}
+
+.card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0px 3px 10px rgba(0,0,0,0.08);
+    margin-bottom: 15px;
+}
+
+.metric-title {
+    font-size: 14px;
+    color: #666;
+}
+
+.metric-value {
+    font-size: 30px;
+    font-weight: bold;
+    color: #0b4f8a;
+}
+
+.report-high {
+    color: #c62828;
+    font-weight: bold;
+}
+
+.report-medium {
+    color: #ef6c00;
+    font-weight: bold;
+}
+
+.report-low {
+    color: #2e7d32;
+    font-weight: bold;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+
+# ---------------------------------------------------
+# SAMPLE WEATHER DATA
+# ---------------------------------------------------
+
+weather_data = pd.DataFrame([
+    {
+        "Event": "Heavy Rainfall",
+        "Location": "Dewas",
+        "Latitude": 22.9676,
+        "Longitude": 76.0534,
+        "Trust Score": 92,
+        "Reports": 28,
+        "Status": "Verified"
+    },
+    {
+        "Event": "Flood Alert",
+        "Location": "Indore",
+        "Latitude": 22.7196,
+        "Longitude": 75.8577,
+        "Trust Score": 88,
+        "Reports": 41,
+        "Status": "Verified"
+    },
+    {
+        "Event": "Storm",
+        "Location": "Ujjain",
+        "Latitude": 23.1765,
+        "Longitude": 75.7885,
+        "Trust Score": 76,
+        "Reports": 17,
+        "Status": "Under Review"
+    },
+    {
+        "Event": "Heatwave",
+        "Location": "Bhopal",
+        "Latitude": 23.2599,
+        "Longitude": 77.4126,
+        "Trust Score": 84,
+        "Reports": 35,
+        "Status": "Verified"
+    },
+    {
+        "Event": "Dust Storm",
+        "Location": "Dhar",
+        "Latitude": 22.6013,
+        "Longitude": 75.3025,
+        "Trust Score": 69,
+        "Reports": 11,
+        "Status": "Under Review"
+    }
+])
+
+
+# ---------------------------------------------------
+# HEADER
+# ---------------------------------------------------
+
+st.markdown("""
+<div class="header">
+
+<h1>🌦️ VayuDrishti</h1>
+
+<p>
+National Weather Big Data Analytics Platform
+</p>
+
+<p>
+AI-powered weather event monitoring, citizen reports
+and intelligent verification
+</p>
+
+</div>
+""", unsafe_allow_html=True)
+
+
+# ---------------------------------------------------
+# SIDEBAR
+# ---------------------------------------------------
+
+st.sidebar.title("VayuDrishti")
+
+st.sidebar.markdown("### Navigation")
+
+page = st.sidebar.radio(
+    "Go to",
+    [
+        "Dashboard",
+        "Report Weather Event",
+        "Reports",
+        "Analytics",
+        "About"
+    ]
+)
+
+st.sidebar.markdown("---")
+
+st.sidebar.info(
+    "Smart India Hackathon 2026\n\n"
+    "Problem Statement: 26069\n\n"
+    "Theme: Disaster Management"
+)
+
+
+# ===================================================
+# DASHBOARD
+# ===================================================
+
+if page == "Dashboard":
+
+    st.subheader("Real-Time Weather Dashboard")
+
+    # Metrics
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        st.markdown("""
+        <div class="card">
+        <div class="metric-title">Active Events</div>
+        <div class="metric-value">12</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col2:
+        st.markdown("""
+        <div class="card">
+        <div class="metric-title">Citizen Reports</div>
+        <div class="metric-value">1,284</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col3:
+        st.markdown("""
+        <div class="card">
+        <div class="metric-title">Verified Reports</div>
+        <div class="metric-value">936</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col4:
+        st.markdown("""
+        <div class="card">
+        <div class="metric-title">Avg. Trust Score</div>
+        <div class="metric-value">86%</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # Map
+
+    st.subheader("📍 Live Weather Events")
+
+    map_data = weather_data[
+        ["Latitude", "Longitude"]
+    ]
+
+    st.map(map_data, zoom=7)
+
+    st.markdown("---")
+
+    # Event table
+
+    st.subheader("⚠️ Current Weather Events")
+
+    st.dataframe(
+        weather_data,
+        use_container_width=True,
+        hide_index=True
+    )
+
+
+# ===================================================
+# REPORT WEATHER EVENT
+# ===================================================
+
+elif page == "Report Weather Event":
+
+    st.subheader("📢 Report a Weather Event")
+
+    st.write(
+        "Citizens can submit local weather observations "
+        "to help improve hyperlocal weather awareness."
+    )
+
+    with st.form("weather_report"):
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+
+            name = st.text_input(
+                "Your Name"
+            )
+
+            location = st.text_input(
+                "Location",
+                placeholder="Example: Dewas"
+            )
+
+            event_type = st.selectbox(
+                "Weather Event",
+                [
+                    "Heavy Rainfall",
+                    "Flood",
+                    "Storm",
+                    "Heatwave",
+                    "Fog",
+                    "Dust Storm",
+                    "Other"
+                ]
+            )
+
+        with col2:
+
+            description = st.text_area(
+                "Describe the Event",
+                placeholder="Describe what you observed..."
+            )
+
+            image = st.file_uploader(
+                "Upload Image",
+                type=["jpg", "jpeg", "png"]
+            )
+
+        submitted = st.form_submit_button(
+            "Submit Report"
+        )
+
+    if submitted:
+
+        if location and description:
+
+            trust_score = random.randint(60, 95)
+
+            st.success(
+                "Your weather report has been submitted successfully!"
+            )
+
+            st.info(
+                f"Initial AI Trust Score: {trust_score}%"
+            )
+
+            st.write(
+                "The report will be cross-verified with "
+                "other available weather sources."
+            )
+
+        else:
+
+            st.warning(
+                "Please provide location and description."
+            )
+
+
+# ===================================================
+# REPORTS
+# ===================================================
+
+elif page == "Reports":
+
+    st.subheader("📋 Citizen Weather Reports")
+
+    search = st.text_input(
+        "Search reports",
+        placeholder="Search by location or event..."
+    )
+
+    filtered_data = weather_data.copy()
+
+    if search:
+
+        filtered_data = filtered_data[
+            filtered_data["Location"].str.contains(
+                search,
+                case=False
+            )
+            |
+            filtered_data["Event"].str.contains(
+                search,
+                case=False
+            )
+        ]
+
+    st.dataframe(
+        filtered_data,
+        use_container_width=True,
+        hide_index=True
+    )
+
+    st.markdown("---")
+
+    st.subheader("Trust Score Explanation")
+
+    st.write(
+        """
+        The VayuDrishti concept uses a graded Trust Score
+        instead of a simple True/False decision.
+
+        The score can consider:
+
+        • Source credibility  
+        • Multiple citizen reports  
+        • Location consistency  
+        • Time consistency  
+        • Weather-source verification  
+        • Image/metadata verification  
+        • Duplicate detection
+        """
+    )
+
+
+# ===================================================
+# ANALYTICS
+# ===================================================
+
+elif page == "Analytics":
+
+    st.subheader("📊 Weather Analytics")
+
+    # Event counts
+
+    event_counts = weather_data["Event"].value_counts()
+
+    st.write("### Weather Event Distribution")
+
+    st.bar_chart(event_counts)
+
+    st.markdown("---")
+
+    # Trust scores
+
+    st.write("### Trust Score by Location")
+
+    trust_data = weather_data[
+        ["Location", "Trust Score"]
+    ].set_index("Location")
+
+    st.bar_chart(trust_data)
+
+    st.markdown("---")
+
+    # Reports
+
+    st.write("### Number of Citizen Reports")
+
+    report_data = weather_data[
+        ["Location", "Reports"]
+    ].set_index("Location")
+
+    st.bar_chart(report_data)
+
+
+# ===================================================
+# ABOUT
+# ===================================================
+
+elif page == "About":
+
+    st.subheader("🌦️ About VayuDrishti")
+
+    st.markdown("""
+    ### VayuDrishti
+
+    VayuDrishti is a proposed National Weather Big Data
+    Analytics Platform for collecting, processing,
+    verifying and visualizing weather-related information.
+
+    ### Key Features
+
+    - Real-time weather data collection
+    - Citizen weather reports
+    - AI/NLP-based processing
+    - Fake report detection
+    - Duplicate detection
+    - Source verification
+    - Weather event classification
+    - Trust Score
+    - Multilingual support
+    - Interactive dashboard
+
+    ### Weather Events
+
+    - Floods
+    - Rainfall
+    - Heatwaves
+    - Storms
+    - Fog
+    - Dust Storms
+
+    ### Technology
+
+    - Python
+    - Streamlit
+    - Pandas
+    - Machine Learning
+    - NLP
+    - OpenCV
+    - Database
+    - Maps & Visualization
+    """)
+
+    st.success(
+        "Smart India Hackathon 2026 | Problem Statement 26069"
+    )
